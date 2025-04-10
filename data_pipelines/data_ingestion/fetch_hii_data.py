@@ -26,13 +26,15 @@ def download_csv(file_url, file_path):
         except requests.exceptions.RequestException as e:
             print(f"❌ Error downloading {file_url}: {e}")
 
-def fetch_rainfall_data(base_url, download_path):
-
+def fetch_rainfall_data(base_url, download_path, year=None):
     os.makedirs(download_path, exist_ok=True)  # ✅ สร้างโฟลเดอร์ที่ถูกต้อง
 
-    """ ดึงข้อมูลทั้งหมดจากเว็บไซต์ """
     year_links = [y for y in get_links(base_url) if y.endswith('/') and y[:-1].isdigit()]
     
+    # หากระบุปี, จะกรองแค่ปีที่ต้องการ
+    if year:
+        year_links = [y for y in year_links if y[:-1] == str(year)]
+
     for year in tqdm(year_links, desc="📅 Fetching Years"):
         year_url = os.path.join(base_url, year)
         year_path = os.path.join(download_path, year.strip("/"))
@@ -49,3 +51,9 @@ def fetch_rainfall_data(base_url, download_path):
                 file_url = os.path.join(month_url, file)
                 file_path = os.path.join(month_path, file)
                 download_csv(file_url, file_path)
+
+
+### For testing purposes only ###
+# BASE_URL = "https://tiservice.hii.or.th/opendata/data_catalog/hourly_rain/"
+# DOWNLOAD_PATH = "./rain_data"
+# fetch_rainfall_data(BASE_URL, DOWNLOAD_PATH, year=2025)
